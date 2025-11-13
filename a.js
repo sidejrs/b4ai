@@ -33,7 +33,7 @@ const CONNECTOR = "com.okex.wallet";
 const RECIPIENT_2 = "0x85Be45eD24FA9695Ff540d8A5ff9dF7b5781a528";
 const MAX_DRIP_FOR_RECIPIENT2 = 3;
 
-const TURNSTILE_SITEKEY = "0x4AAAAAAABk8FbxM5LxMyzk"; // dummy utk 2captcha (tidak dipakai real)
+const TURNSTILE_SITEKEY = "0x4AAAAAAB5QdBYvpAN8f8ZI"; // dummy utk 2captcha (tidak dipakai real)
 const CAPTCHA_KEY = "4ed3fd1e0fe1191d63576ec0cd12c3cb"; // 2captcha API key kamu
 
 // ==============================================
