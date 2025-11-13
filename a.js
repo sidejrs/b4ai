@@ -7,7 +7,7 @@
 import axios from "axios";
 import { ethers } from "ethers";
 import readline from "readline-sync";
-import HttpsProxyAgent from "https-proxy-agent";
+import { HttpsProxyAgent } from "https-proxy-agent";
 
 // ==============================================
 // CONFIG (FIXED)
@@ -45,8 +45,8 @@ function rotateRpc() {
 }
 
 function rotateProxy() {
-    const p = PROXY_LIST[Math.floor(Math.random() * PROXY_LIST.length)];
-    return new HttpsProxyAgent(p);
+    const proxy = PROXY_LIST[Math.floor(Math.random() * PROXY_LIST.length)];
+    return HttpsProxyAgent(proxy);
 }
 
 function sleep(ms) {
@@ -58,31 +58,36 @@ function sleep(ms) {
 // ==============================================
 
 async function solveTurnstile() {
-    console.log("🔄 Solve Turnstile via 2Captcha...");
-    const create = await axios.post(`http://2captcha.com/in.php`, null, {
-        params: {
-            key: CAPTCHA_KEY,
-            method: "turnstile",
-            sitekey: TURNSTILE_SITEKEY,
-            pageurl: "https://www.b402.ai/experience-b402",
-            json: 1
+    console.log("🔄 Solve Turnstile via CapMonster...");
+
+    // 1) Create task
+    const create = await axios.post("https://api.capmonster.cloud/createTask", {
+        clientKey: "9fc295a983d6447d74a88e515ba55cd5",
+        task: {
+            type: "TurnstileTaskProxyless",
+            websiteURL: "https://www.b402.ai/experience-b402",
+            websiteKey: "0x4AAAAAAB5QdBYvpAN8f8ZI"
         }
     });
 
-    const reqId = create.data.request;
-    console.log("📝 Task Captcha ID:", reqId);
+    const taskId = create.data.taskId;
+    console.log("📝 CapMonster Task ID:", taskId);
 
+    // 2) Fetch result until ready
     while (true) {
-        await sleep(5000);
-        const res = await axios.get(`http://2captcha.com/res.php`, {
-            params: { key: CAPTCHA_KEY, action: "get", id: reqId, json: 1 }
+        await new Promise(r => setTimeout(r, 3000));
+
+        const res = await axios.post("https://api.capmonster.cloud/getTaskResult", {
+            clientKey: "9fc295a983d6447d74a88e515ba55cd5",
+            taskId
         });
 
-        if (res.data.status === 1) {
-            console.log("✅ Captcha solved!");
-            return res.data.request;
+        if (res.data.status === "ready") {
+            console.log("✅ Captcha solved (CapMonster)!");
+            return res.data.solution.token;
         }
-        console.log("… waiting captcha result …");
+
+        console.log("… waiting CapMonster result …");
     }
 }
 
